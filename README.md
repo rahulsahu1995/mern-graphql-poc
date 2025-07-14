@@ -1,115 +1,183 @@
-# 🚀 Employee Management Dashboard
+🚀 MERN GraphQL Dashboard
+A modern, responsive React & GraphQL app for managing employee records efficiently — with seamless view toggling, detailed modals, and intuitive CRUD operations, backed by an Apollo Server and MongoDB.
 
-> A modern, responsive React & GraphQL app for **managing employee records** efficiently — with seamless view toggling, detailed modals, and intuitive actions.
+✨ Features
+✅ Toggle between Tile and Grid Views on the frontend
 
----
+✅ Employee Detail Modals with Edit, Flag, and Delete functionality
 
-## ✨ Features
+✅ GraphQL API for efficient querying and mutations
 
-✅ **Toggle between Tile and Grid Views** — Adjust layout based on preference  
+✅ MongoDB for data persistence
 
-✅ **Popup Modal for Employee Details** — Clean, focused view on click  
+✅ Material UI for professional UI components
 
-✅ **Edit, Flag, and Delete** employees with immediate feedback  
+✅ Full TypeScript support on frontend
 
-✅ **Flagged Indicator** — Highlight employees flagged for attention  
+✅ Robust error handling and user feedback with snackbars
 
-✅ **Responsive Design** — Works seamlessly on desktop & mobile  
+🛠 Technology Stack
+Layer Technology
+Frontend React + TypeScript
+API Client Apollo Client (GraphQL)
+UI Components Material UI
+Styling CSS Modules + CSS
+Backend Node.js + Apollo Server
+Database MongoDB
+Schema & Types GraphQL (with SDL schema)
 
-✅ **Material UI Integration** — Polished, accessible UI components  
+⚙️ Getting Started
+Prerequisites
+Node.js (v16+ recommended)
 
+npm or yarn
 
----
+MongoDB installed and running locally or remotely
 
+Frontend Setup
 
-## 🛠 Technology Stack
+1. Clone & Install
 
-| Layer          | Technology             |
-| -------------- | ---------------------- |
-| Frontend       | React + TypeScript     |
-| API Client     | Apollo Client (GraphQL)|
-| UI Components  | Material UI            |
-| Styling        | CSS Modules, CSS       |
-| Backend API    | Apollo Server + MongoDB (separaterepo) |
+git clone https://github.com/yourusername/mern-graphql-dashboard.git
+cd mern-graphql-dashboard/react-assignment-app
 
----
-
-## ⚙️ Getting Started
-
-### Prerequisites
-
-- **Node.js** (v16+)  
-
-- **npm** or **yarn**  
-
-- Access to a compatible GraphQL backend exposing employee data including the `flagged` field
-
-### Installation
-
-```bash
-
-
-git clone https://github.com/yourusername/employee-management-dashboard.git
-
-
-cd employee-management-dashboard
 npm install
 
 # or
 
-
 yarn install
-Configuration
 
-Update your GraphQL endpoint URL in Apollo Client config (e.g. in src/index.tsx or where ApolloClient is instantiated):
-
+2. Configure Apollo Client
+   Update the GraphQL endpoint in your Apollo Client setup (src/index.tsx or wherever ApolloClient is initialized):
 
 const client = new ApolloClient({
-  uri: 'http://localhost:4000/graphql', // <-- Your backend URL
-  cache: new InMemoryCache(),
+uri: 'http://localhost:4000/graphql', // Backend GraphQL API URL
+cache: new InMemoryCache(),
 });
 
-
-Running the App
-Start the dev server:
-
+3. Run Frontend
 
 npm start
+
 # or
+
 yarn start
 
 Open http://localhost:3000 in your browser.
 
-👩‍💼 Usage
-Click Toggle View button to switch between Tile and Grid layouts
+Backend Setup
 
-Click any employee tile or row to open detailed modal
+1. Clone & Install
 
-Use Edit, Flag, Delete buttons on tiles for management
+cd ../node-apis
+npm install
 
-Confirm deletions via modal confirmation popup
+2. Environment Configuration
+   Create a .env file (if applicable) with your MongoDB connection string:
 
-📁 Project Structure
+MONGODB_URI=mongodb://localhost:27017/your-db-name
+PORT=4000
+
+3. Run Backend Server
+
+npm run dev
+
+# or
+
+node index.js
+This starts your Apollo GraphQL server at http://localhost:4000/graphql
+
+Backend GraphQL Schema
+graphql
+
+type Employee {
+id: ID!
+name: String!
+age: Int!
+class: String!
+subjects: [String!]!
+attendance: Float!
+flagged: Boolean!
+}
+
+type Query {
+employees(page: Int, limit: Int, sortBy: String): [Employee!]!
+employee(id: ID!): Employee
+}
+
+type Mutation {
+addEmployee(
+name: String!
+age: Int!
+class: String!
+subjects: [String!]!
+attendance: Float!
+): Employee!
+
+updateEmployee(
+id: ID!
+name: String
+age: Int
+class: String
+subjects: [String]
+attendance: Float
+flagged: Boolean
+): Employee!
+
+deleteEmployee(id: ID!): String!
+}
+
+Usage
+Frontend
+Use the Toggle View button to switch between Tile and Grid views
+
+Click on an employee to view detailed info in a modal
+
+Edit employee details or flag/unflag employees easily
+
+Delete employees with confirmation popup
+
+Add new employees via floating Add button modal
+
+Backend
+Supports querying employees with pagination and sorting (if extended)
+
+Handles employee CRUD operations via mutations
+
+Project Structure Overview
+Frontend (/frontend)
+
 src/
 ├── components/
-│   ├── EmployeeDetails/        # Modal and detail view
-│   ├── EmployeeGrid/           # Grid view table
-│   ├── EmployeeTileView/       # Tile/card view
-│   ├── HamburgerMenu/          # Navigation menu
-│   └── ...
+│ ├── EmployeeDetails/
+│ ├── EmployeeGrid/
+│ ├── EmployeeTileView/
+│ ├── HamburgerMenu/
+│ └── ...
 ├── pages/
-│   └── Dashboard.tsx           # Main dashboard page
+│ └── Dashboard.tsx
 ├── types/
-│   └── Employee.ts             # 
-|
-├── index.tsx
+│ └── Employee.ts
+└── index.tsx
 
-🔧 GraphQL Operations
+Backend (/backend)
+graphql
 
-Queries
-employees — Fetch all employees with all fields, including flagged
+src/
+├── schema/
+│ └── typeDefs.js (GraphQL schema)
+├── resolvers/
+│ └── index.js
+├── models/
+|--User.js
+│ └── Employee.js (Mongoose schema)
+├── index.js (server entry)
+├── config.js (DB connection)
+└── ...
 
-Mutations
-updateEmployee — Update employee fields, including flag status
+Additional Notes
+Ensure MongoDB is running before starting the backend
 
-deleteEmployee — Delete employee by ID
+Frontend and backend communicate over GraphQL at the specified endpoint
+
+Customize your GraphQL schema and resolvers as needed for additional features
