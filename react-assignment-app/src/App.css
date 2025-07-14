@@ -1,0 +1,51 @@
+/* App.css */
+
+.app-container {
+  padding-top: 32px;
+  padding-bottom: 32px;
+  padding-left: 0;
+  padding-right: 0;
+  max-width: 1280px; /* matches MUI's lg maxWidth */
+  margin: 0 auto; /* center horizontally */
+}
+
+.title {
+  font-weight: 700;
+  margin-bottom: 24px;
+  font-family: "Roboto", sans-serif;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.buttonWrapper {
+  padding-left: 16px;
+  padding-right: 16px;
+  margin-bottom: 24px;
+  margin-top: 24px;
+
+  display: flex;
+  justify-content: flex-start;
+}
+
+.tileRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+  width: 100%;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.dividerStyle {
+  border-color: #bbb !important;
+  margin-top: 16px !important;
+  margin-bottom: 16px !important;
+  opacity: 0.4 !important;
+}
+
+.loadingBox {
+  display: flex;
+  justify-content: center;
+  margin-top: 80px;
+}

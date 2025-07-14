@@ -1,0 +1,39 @@
+# Node.js
+node_modules/
+.env
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+build/
+coverage/
+.DS_Store
+*.local
+*.log
+
+# VS Code
+.vscode/
+
+# OS
+Thumbs.db
+Desktop.ini
+
+# Apollo Server
+*.sqlite
+
+# Misc
+*.tgz
+
+# Ignore test coverage
+coverage/
+
+# Ignore MongoDB data
+*.db
+
+# Ignore logs
+logs/
+*.log
+
+# Ignore temp files
+*.tmp
+*.swp

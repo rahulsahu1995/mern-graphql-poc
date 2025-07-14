@@ -1,0 +1,30 @@
+/* Container for each row of tiles - flexbox with spacing */
+.tileRow {
+  display: flex;
+  gap: 50px !important; /* spacing between tiles */
+  margin-bottom: 30px !important;
+}
+
+/* Each tile item fills 1/3rd width minus gap */
+.tileItem {
+  flex: 1 1 calc(33.333% - 16px); /* 3 items per row with spacing */
+  box-sizing: border-box;
+}
+
+/* Responsive: stack tiles on smaller screens */
+@media (max-width: 900px) {
+  .tileRow {
+    flex-wrap: wrap;
+  }
+
+  .tileItem {
+    flex: 1 1 100%; /* stack tiles vertically */
+  }
+}
+
+/* Add some padding and center content */
+.dashboardContainer {
+  padding: 20px;
+  max-width: 1200px;
+  margin: auto;
+}

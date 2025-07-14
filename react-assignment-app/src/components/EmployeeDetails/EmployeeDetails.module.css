@@ -1,0 +1,35 @@
+.detailsContainer {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 24px 32px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  max-width: 400px;
+  margin: 16px auto;
+  font-family: "Roboto", sans-serif;
+  color: #222;
+}
+
+.name {
+  font-weight: 700;
+  font-size: 1.8rem;
+  margin-bottom: 12px;
+  color: #1a237e;
+}
+
+.divider {
+  margin: 12px 0 24px;
+  border: none;
+  border-bottom: 2px solid #1976d2;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  font-size: 1.1rem;
+}
+
+.label {
+  font-weight: 600;
+  color: #555;
+}
