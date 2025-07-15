@@ -1,183 +1,241 @@
-🚀 MERN GraphQL Dashboard
-A modern, responsive React & GraphQL app for managing employee records efficiently — with seamless view toggling, detailed modals, and intuitive CRUD operations, backed by an Apollo Server and MongoDB.
+# 🚀 MERN GraphQL Employee Dashboard
 
-✨ Features
-✅ Toggle between Tile and Grid Views on the frontend
+A modern, responsive React & GraphQL app for **managing employee records** efficiently — with seamless toggle between **Tile** and **Grid** views, detailed modals, and intuitive **CRUD** operations backed by Apollo Server and MongoDB.
 
-✅ Employee Detail Modals with Edit, Flag, and Delete functionality
+---
 
-✅ GraphQL API for efficient querying and mutations
+## ✨ Features
 
-✅ MongoDB for data persistence
+- 🔁 Toggle between **Tile View** and **Grid View** on the frontend  
+- 📋 Employee detail modals with **Edit**, **Flag/Unflag**, **Delete**, and **Add New Employee** functionality  
+- 🔐 **Authentication** — Login & Register with role-based access control and JWT token storage  
+- ✅ **Form validation** using `react-hook-form` with reusable validation rules from constants files  
+- 📦 GraphQL API with efficient queries and mutations for employee data  
+- Data persistence using **MongoDB**  
+- Professional UI components powered by **Material UI**  
+- Full **TypeScript** support on the frontend  
+- Robust error handling and user feedback using **Snackbars**  
+- Pagination and sorting support in Grid View (via MUI DataGrid)  
+- Floating **Add Employee** button with popup form  
+- Flagged state toggling for employees reflected instantly on UI  
 
-✅ Material UI for professional UI components
+---
 
-✅ Full TypeScript support on frontend
+## 🛠 Technology Stack
 
-✅ Robust error handling and user feedback with snackbars
+| Layer         | Technology               |
+|---------------|--------------------------|
+| Frontend      | React + TypeScript       |
+| API Client    | Apollo Client (GraphQL)  |
+| UI Components | Material UI              |
+| Styling       | CSS Modules + CSS        |
+| Form Handling | react-hook-form          |
+| Backend       | Node.js + Apollo Server  |
+| Database      | MongoDB                  |
+| Schema & Types| GraphQL (SDL schema)     |
+| Authentication| JWT                      |
 
-🛠 Technology Stack
-Layer Technology
-Frontend React + TypeScript
-API Client Apollo Client (GraphQL)
-UI Components Material UI
-Styling CSS Modules + CSS
-Backend Node.js + Apollo Server
-Database MongoDB
-Schema & Types GraphQL (with SDL schema)
+---
 
-⚙️ Getting Started
-Prerequisites
-Node.js (v16+ recommended)
+## ⚙️ Getting Started
 
-npm or yarn
+### Prerequisites
 
-MongoDB installed and running locally or remotely
+- Node.js v16+  
+- npm or yarn  
+- MongoDB installed and running locally or remotely  
 
-Frontend Setup
+---
 
-1. Clone & Install
+### Frontend Setup
 
-git clone https://github.com/yourusername/mern-graphql-dashboard.git
-cd mern-graphql-dashboard/react-assignment-app
+1. Clone and install dependencies:
 
-npm install
+   ```bash
 
-# or
+   git clone https://github.com/yourusername/mern-graphql-dashboard.git
+   cd mern-graphql-dashboard/react-assignment-app
 
-yarn install
+   npm install
+   # or
+   yarn install
 
-2. Configure Apollo Client
-   Update the GraphQL endpoint in your Apollo Client setup (src/index.tsx or wherever ApolloClient is initialized):
+Install additional dependencies for form validation and auth:
+
+
+npm install react-hook-form
+# Optional if using schema validation
+npm install @hookform/resolvers yup
+
+Configure Apollo Client URI in src/index.tsx (or your Apollo setup file):
+
+
+import { ApolloClient, InMemoryCache } from '@apollo/client';
 
 const client = new ApolloClient({
-uri: 'http://localhost:4000/graphql', // Backend GraphQL API URL
-cache: new InMemoryCache(),
+  uri: 'http://localhost:4000/graphql', // Backend GraphQL API URL
+  cache: new InMemoryCache(),
+  headers: {
+    authorization: `Bearer ${localStorage.getItem('token') || ''}`,
+  },
 });
 
-3. Run Frontend
+Run the frontend:
 
 npm start
-
 # or
-
 yarn start
 
 Open http://localhost:3000 in your browser.
 
-Backend Setup
 
-1. Clone & Install
+Backend Setup
+Navigate to backend folder and install dependencies:
 
 cd ../node-apis
 npm install
 
-2. Environment Configuration
-   Create a .env file (if applicable) with your MongoDB connection string:
+Create a .env file with your MongoDB connection string and server port:
 
 MONGODB_URI=mongodb://localhost:27017/your-db-name
 PORT=4000
+JWT_SECRET=your_secret_key_here
 
-3. Run Backend Server
+
+Run backend server:
 
 npm run dev
-
 # or
-
 node index.js
-This starts your Apollo GraphQL server at http://localhost:4000/graphql
 
-Backend GraphQL Schema
-graphql
+Your Apollo GraphQL server will be running at http://localhost:4000/graphql.
 
+📜 Backend GraphQL Schema
+ 
 type Employee {
-id: ID!
-name: String!
-age: Int!
-class: String!
-subjects: [String!]!
-attendance: Float!
-flagged: Boolean!
+  id: ID!
+  name: String!
+  age: Int!
+  class: String!
+  subjects: [String!]!
+  attendance: Float!
+  flagged: Boolean!
 }
 
 type Query {
-employees(page: Int, limit: Int, sortBy: String): [Employee!]!
-employee(id: ID!): Employee
+  employees(page: Int, limit: Int, sortBy: String): [Employee!]!
+  employee(id: ID!): Employee
 }
 
 type Mutation {
-addEmployee(
-name: String!
-age: Int!
-class: String!
-subjects: [String!]!
-attendance: Float!
-): Employee!
+  addEmployee(
+    name: String!
+    age: Int!
+    class: String!
+    subjects: [String!]!
+    attendance: Float!
+    flagged: Boolean
+  ): Employee!
 
-updateEmployee(
-id: ID!
-name: String
-age: Int
-class: String
-subjects: [String]
-attendance: Float
-flagged: Boolean
-): Employee!
+  updateEmployee(
+    id: ID!
+    name: String
+    age: Int
+    class: String
+    subjects: [String]
+    attendance: Float
+    flagged: Boolean
+  ): Employee!
 
-deleteEmployee(id: ID!): String!
+  deleteEmployee(id: ID!): String!
+
+  # Authentication mutations:
+  register(username: String!, password: String!, role: String!): AuthPayload!
+  login(username: String!, password: String!): AuthPayload!
 }
 
-Usage
-Frontend
-Use the Toggle View button to switch between Tile and Grid views
+type AuthPayload {
+  token: String!
+  role: String!
+}
 
-Click on an employee to view detailed info in a modal
 
-Edit employee details or flag/unflag employees easily
+🔒 Authentication Details
+The backend uses JWT tokens for authentication.
 
-Delete employees with confirmation popup
+Upon successful login or registration, a token is returned and stored in localStorage.
 
-Add new employees via floating Add button modal
+This token is sent in the Authorization header for protected GraphQL operations.
 
-Backend
-Supports querying employees with pagination and sorting (if extended)
+Frontend components restrict access based on user role (admin, employee).
 
-Handles employee CRUD operations via mutations
+🗂 Project Structure
 
-Project Structure Overview
-Frontend (/frontend)
+Frontend (/react-assignment-app)
 
 src/
 ├── components/
-│ ├── EmployeeDetails/
-│ ├── EmployeeGrid/
-│ ├── EmployeeTileView/
-│ ├── HamburgerMenu/
-│ └── ...
+│   ├── EmployeeDetails/
+│   ├── EmployeeGrid/
+│   ├── EmployeeTileView/
+│   ├── HamburgerMenu/
+│   └── ...
 ├── pages/
-│ └── Dashboard.tsx
+│   ├── Dashboard.tsx
+│   ├── Login/
+│   │   ├── Login.tsx
+│   │   └── constants.ts
+│   └── Register/
+│       ├── Register.tsx
+│       └── constants.ts
 ├── types/
-│ └── Employee.ts
+│   └── Employee.ts
 └── index.tsx
 
-Backend (/backend)
-graphql
 
+
+Backend (/node-apis)
 src/
 ├── schema/
-│ └── typeDefs.js (GraphQL schema)
+│   └── typeDefs.js          # GraphQL schema definitions
 ├── resolvers/
-│ └── index.js
+│   └── index.js             # GraphQL resolvers
 ├── models/
-|--User.js
-│ └── Employee.js (Mongoose schema)
-├── index.js (server entry)
-├── config.js (DB connection)
+│   ├── User.js              # User mongoose schema
+│   └── Employee.js          # Employee mongoose schema
+├── utils/
+│   └── auth.js              # Auth helpers (JWT verification, hashing)
+├── index.js                 # Server entry point
+├── config.js                # DB connection configs
 └── ...
 
-Additional Notes
-Ensure MongoDB is running before starting the backend
 
-Frontend and backend communicate over GraphQL at the specified endpoint
+🚀 Usage
+Frontend
 
-Customize your GraphQL schema and resolvers as needed for additional features
+Use Toggle View button to switch between Tile and Grid views.
+
+Click an employee tile or row to open detail modal.
+
+Edit employee details or flag/unflag employees (flag status updates instantly).
+
+Delete employees with confirmation dialog.
+
+Add new employees via floating Add button and modal form.
+
+Register new users or login with existing credentials.
+
+Role-based UI control for admins and employees.
+
+
+Backend
+
+Provides GraphQL queries to fetch employees with pagination and sorting.
+
+Supports mutations to add, update (including flag toggle), and delete employees.
+
+Supports user registration and login returning JWT tokens.
+
+Uses MongoDB for persistent storage.
+
+JWT protects secured operations; clients must send tokens.

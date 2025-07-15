@@ -4,9 +4,9 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import client from "./apollo-client";
 import { ApolloProvider } from "@apollo/client";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
+import Login from "./pages/Login/Login";
+import Register from "./pages/Register/Register";
+import Dashboard from "./pages/Dashboard/Dashboard";
 import PrivateRoute from "./routes/PrivateRoute";
 import "./App.css"; // global styling
 

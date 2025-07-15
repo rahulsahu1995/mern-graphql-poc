@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { useQuery, useMutation, gql } from "@apollo/client";
-import HamburgerMenu from "../components/HamburgerMenu/HamburgerMenu";
-import EmployeeGrid from "../components/EmployeeGrid/EmployeeGrid";
-import EmployeeTileView from "../components/EmployeeTileView/EmployeeTileView";
-import EmployeeDetails from "../components/EmployeeDetails/EmployeeDetails";
+import React, { useState, useEffect } from "react";
+import { useQuery, useMutation, gql, useApolloClient } from "@apollo/client";
+import HamburgerMenu from "../../components/HamburgerMenu/HamburgerMenu";
+import EmployeeGrid from "../../components/EmployeeGrid/EmployeeGrid";
+import EmployeeTileView from "../../components/EmployeeTileView/EmployeeTileView";
+import EmployeeDetails from "../../components/EmployeeDetails/EmployeeDetails";
 import "./Dashboard.css";
 
 import {
@@ -11,7 +11,6 @@ import {
   DialogContent,
   DialogActions,
   DialogTitle,
-  IconButton,
   Button,
   TextField,
   Checkbox,
@@ -21,7 +20,6 @@ import {
   Alert,
   Fab,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 
 const ITEMS_PER_ROW = 3;
@@ -44,10 +42,10 @@ const ADD_EMPLOYEE = gql`
   mutation AddEmployee(
     $name: String!
     $age: Int!
-    $class: String!
-    $attendance: Float!
+    $class: String
+    $attendance: Float
     $subjects: [String!]!
-    
+    $flagged: Boolean
   ) {
     addEmployee(
       name: $name
@@ -74,7 +72,7 @@ const UPDATE_EMPLOYEE = gql`
     $name: String
     $age: Int
     $class: String
-    $subjects: [String]
+    $subjects: [String!]
     $attendance: Float
     $flagged: Boolean
   ) {
@@ -105,10 +103,21 @@ const DELETE_EMPLOYEE = gql`
 `;
 
 const Dashboard: React.FC = () => {
-  const { loading, error, data, refetch } = useQuery(GET_EMPLOYEES);
+  const client = useApolloClient();
+
+  const { loading, error, data } = useQuery(GET_EMPLOYEES);
   const [addEmployee] = useMutation(ADD_EMPLOYEE);
   const [updateEmployee] = useMutation(UPDATE_EMPLOYEE);
   const [deleteEmployee] = useMutation(DELETE_EMPLOYEE);
+
+  // New state for role-based control
+  const [role, setRole] = useState<string | null>(null);
+
+  // Read role from localStorage on mount
+  useEffect(() => {
+    const storedRole = localStorage.getItem("role");
+    setRole(storedRole);
+  }, []);
 
   const [selected, setSelected] = useState<any>(null);
   const [tileView, setTileView] = useState(true);
@@ -118,9 +127,9 @@ const Dashboard: React.FC = () => {
   const [editForm, setEditForm] = useState<any>({
     id: "",
     name: "",
-    age: 0,
+    age: "",
     class: "",
-    attendance: 0,
+    attendance: "",
     subjects: [],
     flagged: false,
   });
@@ -144,35 +153,54 @@ const Dashboard: React.FC = () => {
     rows.push(employees.slice(i, i + ITEMS_PER_ROW));
   }
 
-  // Open Edit Form with employee data
   const openEdit = (employee: any) => {
-    setEditForm({ ...employee });
+    if (role !== "admin") return; // Only admin can edit
+    setEditForm({
+      ...employee,
+      age: employee.age?.toString() ?? "",
+      attendance: employee.attendance?.toString() ?? "",
+    });
     setIsEditing(true);
     setIsAdding(false);
     setSelected(employee);
   };
 
-  // Handle subjects input change (comma separated string to array)
-  const handleSubjectsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const arr = e.target.value.split(",").map((s) => s.trim());
-    setEditForm((prev: any) => ({ ...prev, subjects: arr }));
+  const cleanSubjects = (subjects: any[]) => {
+    return (subjects ?? []).filter(
+      (s) => typeof s === "string" && s.trim() !== ""
+    );
   };
 
-  // Save edits
   const handleSave = async () => {
     try {
-      await updateEmployee({
+      const { data: mutationData } = await updateEmployee({
         variables: {
           id: editForm.id,
           name: editForm.name,
-          age: Number(editForm.age),
+          age: parseInt(editForm.age, 10),
           class: editForm.class,
-          attendance: Number(editForm.attendance),
-          subjects: editForm.subjects,
+          attendance: parseFloat(editForm.attendance),
+          subjects: cleanSubjects(editForm.subjects),
           flagged: editForm.flagged,
         },
       });
-      await refetch();
+
+      if (mutationData?.updateEmployee) {
+        const existing = client.readQuery({ query: GET_EMPLOYEES });
+        if (existing) {
+          client.writeQuery({
+            query: GET_EMPLOYEES,
+            data: {
+              employees: existing.employees.map((emp: any) =>
+                emp.id === mutationData.updateEmployee.id
+                  ? mutationData.updateEmployee
+                  : emp
+              ),
+            },
+          });
+        }
+      }
+
       setIsEditing(false);
       setSelected(null);
       setSnackbarMessage("Employee updated successfully");
@@ -185,27 +213,38 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Add new employee
   const handleAdd = async () => {
     try {
-      await addEmployee({
+      const { data: mutationData } = await addEmployee({
         variables: {
           name: editForm.name,
-          age: Number(editForm.age),
+          age: parseInt(editForm.age, 10),
           class: editForm.class,
-          attendance: Number(editForm.attendance),
-          subjects: editForm.subjects,
+          attendance: parseFloat(editForm.attendance),
+          subjects: cleanSubjects(editForm.subjects),
           flagged: editForm.flagged,
         },
       });
-      await refetch();
+
+      if (mutationData?.addEmployee) {
+        const existing = client.readQuery({ query: GET_EMPLOYEES });
+        if (existing) {
+          client.writeQuery({
+            query: GET_EMPLOYEES,
+            data: {
+              employees: [...existing.employees, mutationData.addEmployee],
+            },
+          });
+        }
+      }
+
       setIsAdding(false);
       setEditForm({
         id: "",
         name: "",
-        age: 0,
+        age: "",
         class: "",
-        attendance: 0,
+        attendance: "",
         subjects: [],
         flagged: false,
       });
@@ -220,6 +259,7 @@ const Dashboard: React.FC = () => {
   };
 
   const handleDeleteClick = (emp: any) => {
+    if (role !== "admin") return; // only admin can delete
     setEmployeeToDelete(emp);
     setDeleteConfirmOpen(true);
   };
@@ -227,8 +267,20 @@ const Dashboard: React.FC = () => {
   const handleConfirmDelete = async () => {
     try {
       await deleteEmployee({ variables: { id: employeeToDelete.id } });
+
+      const existing = client.readQuery({ query: GET_EMPLOYEES });
+      if (existing) {
+        client.writeQuery({
+          query: GET_EMPLOYEES,
+          data: {
+            employees: existing.employees.filter(
+              (emp: any) => emp.id !== employeeToDelete.id
+            ),
+          },
+        });
+      }
+
       if (selected?.id === employeeToDelete.id) setSelected(null);
-      await refetch();
       setSnackbarMessage("Deleted successfully");
       setSnackbarSeverity("success");
     } catch (err: any) {
@@ -242,11 +294,27 @@ const Dashboard: React.FC = () => {
   };
 
   const handleFlagToggle = async (emp: any) => {
+    if (role !== "admin") return; // only admin can flag
     try {
-      await updateEmployee({
+      const { data: mutationData } = await updateEmployee({
         variables: { id: emp.id, flagged: !emp.flagged },
       });
-      await refetch();
+
+      if (mutationData?.updateEmployee) {
+        const existing = client.readQuery({ query: GET_EMPLOYEES });
+        if (existing) {
+          client.writeQuery({
+            query: GET_EMPLOYEES,
+            data: {
+              employees: existing.employees.map((e: any) =>
+                e.id === mutationData.updateEmployee.id
+                  ? mutationData.updateEmployee
+                  : e
+              ),
+            },
+          });
+        }
+      }
     } catch (err: any) {
       setSnackbarMessage("Failed to toggle flag: " + err.message);
       setSnackbarSeverity("error");
@@ -258,14 +326,15 @@ const Dashboard: React.FC = () => {
     <>
       <HamburgerMenu />
       <div className="dashboardContainer">
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => setTileView(!tileView)}
-          sx={{ mb: 3 }}
-        >
-          Toggle {tileView ? "Grid" : "Tile"} View
-        </Button>
+        <div className="toggleButtonWrapper">
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setTileView(!tileView)}
+          >
+            Toggle {tileView ? "Grid" : "Tile"} View
+          </Button>
+        </div>
 
         {tileView ? (
           rows.map((row, idx) => (
@@ -275,9 +344,15 @@ const Dashboard: React.FC = () => {
                   <EmployeeTileView
                     employee={emp}
                     onClick={() => setSelected(emp)}
-                    onEdit={() => openEdit(emp)}
-                    onDelete={() => handleDeleteClick(emp)}
-                    onFlag={() => handleFlagToggle(emp)}
+                    onEdit={role === "admin" ? () => openEdit(emp) : undefined}
+                    onDelete={
+                      role === "admin"
+                        ? () => handleDeleteClick(emp)
+                        : undefined
+                    }
+                    onFlag={
+                      role === "admin" ? () => handleFlagToggle(emp) : undefined
+                    }
                   />
                 </div>
               ))}
@@ -287,34 +362,43 @@ const Dashboard: React.FC = () => {
           <EmployeeGrid
             employees={employees}
             onRowClick={setSelected}
-            onEdit={openEdit}
-            onDelete={handleDeleteClick}
-            onFlag={handleFlagToggle}
+            onEdit={role === "admin" ? openEdit : undefined}
+            onDelete={
+              role === "admin"
+                ? (id) => {
+                    const emp = employees.find((e: any) => e.id === id);
+                    if (emp) handleDeleteClick(emp);
+                  }
+                : undefined
+            }
+            onFlag={role === "admin" ? handleFlagToggle : undefined}
           />
         )}
 
-        {/* Floating Add Button */}
-        <Fab
-          color="secondary"
-          sx={{ position: "fixed", bottom: 30, right: 30 }}
-          onClick={() => {
-            setEditForm({
-              id: "",
-              name: "",
-              age: 0,
-              class: "",
-              attendance: 0,
-              subjects: [],
-              flagged: false,
-            });
-            setIsAdding(true);
-            setIsEditing(false);
-            setSelected(null);
-          }}
-          aria-label="add"
-        >
-          <AddIcon />
-        </Fab>
+        {/* Floating Add Button - only show if admin */}
+        {role === "admin" && (
+          <Fab
+            color="secondary"
+            sx={{ position: "fixed", bottom: 30, right: 30 }}
+            onClick={() => {
+              setEditForm({
+                id: "",
+                name: "",
+                age: "",
+                class: "",
+                attendance: "",
+                subjects: [],
+                flagged: false,
+              });
+              setIsAdding(true);
+              setIsEditing(false);
+              setSelected(null);
+            }}
+            aria-label="add"
+          >
+            <AddIcon />
+          </Fab>
+        )}
 
         {/* Add/Edit Dialog */}
         <Dialog
@@ -328,24 +412,22 @@ const Dashboard: React.FC = () => {
           fullWidth
         >
           <DialogTitle>
-            {isAdding
-              ? "Add New Employee"
-              : isEditing
-              ? "Edit Employee"
-              : "Employee Details"}
+            {isAdding ? "Add New Employee" : isEditing ? "Edit Employee" : " "}
           </DialogTitle>
           <DialogContent>
             {selected && !isEditing && !isAdding ? (
               <>
                 <EmployeeDetails employee={selected} />
-                <Box sx={{ mt: 2, textAlign: "right" }}>
-                  <Button
-                    variant="contained"
-                    onClick={() => openEdit(selected)}
-                  >
-                    Edit
-                  </Button>
-                </Box>
+                {role === "admin" && (
+                  <Box sx={{ mt: 2, textAlign: "right" }}>
+                    <Button
+                      variant="contained"
+                      onClick={() => openEdit(selected)}
+                    >
+                      Edit
+                    </Button>
+                  </Box>
+                )}
               </>
             ) : (
               <Box
@@ -362,16 +444,23 @@ const Dashboard: React.FC = () => {
                   }
                   required
                 />
+                {/* Age without spinner */}
                 <TextField
                   label="Age"
-                  type="number"
+                  type="text"
+                  inputProps={{
+                    inputMode: "numeric",
+                    pattern: "[0-9]*",
+                    maxLength: 3,
+                    style: { MozAppearance: "textfield" }, // Firefox spinner removal
+                  }}
                   value={editForm.age}
-                  onChange={(e) =>
-                    setEditForm({
-                      ...editForm,
-                      age: Number(e.target.value) || 0,
-                    })
-                  }
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "" || /^[0-9]{0,3}$/.test(val)) {
+                      setEditForm({ ...editForm, age: val });
+                    }
+                  }}
                   required
                 />
                 <TextField
@@ -382,23 +471,32 @@ const Dashboard: React.FC = () => {
                   }
                   required
                 />
+                {/* Attendance without spinner */}
                 <TextField
-                  label="Attendance"
-                  type="number"
-                  inputProps={{ step: 0.1, min: 0, max: 100 }}
+                  label="Attendance (%)"
+                  type="text"
+                  inputProps={{
+                    inputMode: "decimal",
+                    pattern: "[0-9]*\\.?[0-9]*",
+                    maxLength: 6,
+                    style: { MozAppearance: "textfield" },
+                  }}
                   value={editForm.attendance}
-                  onChange={(e) =>
-                    setEditForm({
-                      ...editForm,
-                      attendance: Number(e.target.value) || 0,
-                    })
-                  }
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "" || /^[0-9]*\.?[0-9]{0,2}$/.test(val)) {
+                      setEditForm({ ...editForm, attendance: val });
+                    }
+                  }}
                   required
                 />
                 <TextField
                   label="Subjects (comma separated)"
                   value={editForm.subjects.join(", ")}
-                  onChange={handleSubjectsChange}
+                  onChange={(e) => {
+                    const arr = e.target.value.split(",").map((s) => s.trim());
+                    setEditForm((prev: any) => ({ ...prev, subjects: arr }));
+                  }}
                 />
                 <FormControlLabel
                   control={
@@ -430,8 +528,8 @@ const Dashboard: React.FC = () => {
                     disabled={
                       !editForm.name ||
                       !editForm.class ||
-                      editForm.age <= 0 ||
-                      editForm.attendance < 0
+                      editForm.age === "" ||
+                      editForm.attendance === ""
                     }
                   >
                     Save

@@ -28,3 +28,10 @@
   max-width: 1200px;
   margin: auto;
 }
+.toggleButtonWrapper {
+  display: flex;
+  margin-left: 16px;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-right: 20px; /* adjust based on your tile/grid padding */
+}

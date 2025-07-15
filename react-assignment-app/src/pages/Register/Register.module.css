@@ -1,0 +1,27 @@
+.paper {
+  margin-top: 64px;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.button {
+  margin-top: 24px;
+  padding: 12px;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.error {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.link {
+  margin-top: 24px !important;
+}

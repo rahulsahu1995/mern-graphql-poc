@@ -15,10 +15,10 @@ import styles from "./EmployeeTileView.module.css";
 
 interface Props {
   employee: Employee & { flagged?: boolean };
-  onClick: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
-  onFlag: () => void;
+  onClick?: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  onFlag?: () => void;
 }
 
 const EmployeeTileView: React.FC<Props> = ({
@@ -74,27 +74,38 @@ const EmployeeTileView: React.FC<Props> = ({
               size="small"
               color="primary"
               aria-label="edit employee"
-              onClick={onEdit}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit?.();
+              }}
             >
               <EditIcon fontSize="small" />
             </IconButton>
           </Tooltip>
+
           <Tooltip title={employee.flagged ? "Unflag" : "Flag"}>
             <IconButton
               size="small"
               color={employee.flagged ? "error" : "warning"}
               aria-label="flag employee"
-              onClick={onFlag}
+              onClick={(e) => {
+                e.stopPropagation();
+                onFlag?.();
+              }}
             >
               <FlagIcon fontSize="small" />
             </IconButton>
           </Tooltip>
+
           <Tooltip title="Delete">
             <IconButton
               size="small"
               color="error"
               aria-label="delete employee"
-              onClick={onDelete}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete?.();
+              }}
             >
               <DeleteIcon fontSize="small" />
             </IconButton>

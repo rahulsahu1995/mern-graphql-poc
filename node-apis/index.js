@@ -15,7 +15,7 @@ async function startServer() {
     typeDefs,
     resolvers,
     context: ({ req }) => {
-      const user = getUserFromToken(req);
+      const user = getUserFromToken(req); // decode user from token in headers
       return { user };
     },
     introspection: true,

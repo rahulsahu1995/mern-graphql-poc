@@ -6,7 +6,7 @@ import {
   GridPaginationModel,
   GridRenderCellParams,
 } from "@mui/x-data-grid";
-import { IconButton, Tooltip } from "@mui/material";
+import { IconButton, Tooltip, Checkbox } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import FlagIcon from "@mui/icons-material/Flag";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -16,9 +16,9 @@ import { Employee } from "../../types/Employee";
 interface Props {
   employees: Employee[];
   onRowClick: (employee: Employee) => void;
-  onEdit: (employee: Employee) => void;
-  onDelete: (id: string) => void;
-  onFlag: (employee: Employee) => void;
+  onEdit?: (employee: Employee) => void;
+  onDelete?: (id: string) => void;
+  onFlag?: (employee: Employee) => void;
 }
 
 const EmployeeGrid: React.FC<Props> = ({
@@ -83,6 +83,16 @@ const EmployeeGrid: React.FC<Props> = ({
         Array.isArray(params.value) ? params.value.join(", ") : "",
     },
     {
+      field: "flagged",
+      headerName: "Flagged",
+      width: 100,
+      headerAlign: "center",
+      align: "center",
+      renderCell: (params: GridRenderCellParams<Employee>) => (
+        <Checkbox checked={!!params.value} disabled />
+      ),
+    },
+    {
       field: "actions",
       headerName: "Actions",
       width: 150,
@@ -98,7 +108,7 @@ const EmployeeGrid: React.FC<Props> = ({
               color="primary"
               onClick={(e) => {
                 e.stopPropagation();
-                onEdit(params.row);
+                onEdit?.(params.row);
               }}
             >
               <EditIcon fontSize="small" />
@@ -110,7 +120,7 @@ const EmployeeGrid: React.FC<Props> = ({
               color="warning"
               onClick={(e) => {
                 e.stopPropagation();
-                onFlag(params.row);
+                onFlag?.(params.row);
               }}
             >
               <FlagIcon fontSize="small" />
@@ -122,7 +132,7 @@ const EmployeeGrid: React.FC<Props> = ({
               color="error"
               onClick={(e) => {
                 e.stopPropagation();
-                onDelete(params.row.id);
+                onDelete?.(params.row.id);
               }}
             >
               <DeleteIcon fontSize="small" />

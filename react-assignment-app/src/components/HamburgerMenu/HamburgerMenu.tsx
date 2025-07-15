@@ -11,18 +11,27 @@ import {
   Box,
   AppBar,
   Button,
+  Divider,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import styles from "./HamburgerMenu.module.css";
+import { useNavigate } from "react-router-dom";
 
 const menuItems = ["Dashboard", "Employees", "Settings"];
 const centerItems = ["Home", "Employees", "Reports"];
 
 const HamburgerMenu: React.FC = () => {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleItemClick = (item: string) => {
     console.log(`Clicked on ${item}`);
+    setOpen(false);
+  };
+
+  const handleSignOut = () => {
+    localStorage.clear(); // clear token and role
+    navigate("/login"); // navigate to login page
     setOpen(false);
   };
 
@@ -64,6 +73,7 @@ const HamburgerMenu: React.FC = () => {
         <Box className={styles.drawerHeader}>
           <Typography variant="h6">Menu</Typography>
         </Box>
+
         <List>
           {menuItems.map((text) => (
             <ListItem key={text} disablePadding>
@@ -72,6 +82,15 @@ const HamburgerMenu: React.FC = () => {
               </ListItemButton>
             </ListItem>
           ))}
+
+          <Divider />
+
+          {/* Sign Out button */}
+          <ListItem disablePadding>
+            <ListItemButton onClick={handleSignOut}>
+              <ListItemText primary="Sign Out" />
+            </ListItemButton>
+          </ListItem>
         </List>
       </Drawer>
     </>
